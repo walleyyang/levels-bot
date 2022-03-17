@@ -1,0 +1,8 @@
+BOT_TOKEN=
+CHANNEL_ID_LEVELS=
+
+# Links
+ES=
+NQ=
+RTY=
+SPY=
