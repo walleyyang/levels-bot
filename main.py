@@ -15,6 +15,10 @@ rut = 'RUT'
 spx = 'SPX'
 ndx = 'NDX'
 spy = 'SPY'
+qqq = 'QQQ'
+
+valid_symbols = [es, nq, rty, rut, spx, ndx, spy, qqq]
+single_column_symbols = [spy, qqq]
 
 total_levels = {}
 headers = {
@@ -34,11 +38,12 @@ def init():
         es: getenv(es),
         nq: getenv(nq),
         rty: getenv(rty),
-        spy: getenv(spy)
+        spy: getenv(spy),
+        qqq: getenv(qqq)
     }
 
     for link in links:
-        if link == spy and links[link]:
+        if link in single_column_symbols and links[link]:
             total_levels.update(get_levels_single_column(links[link]))
         else:
             if links[link]:
@@ -119,14 +124,15 @@ def create_tos_script():
     f.write(get_line_colors() + '\n')
 
     for symbol in total_levels:
-        levels = total_levels[symbol]
+        if symbol in valid_symbols:
+            levels = total_levels[symbol]
 
-        tos_scripts = f'\n\n#### {symbol} ####\n'
+            tos_scripts = f'\n\n#### {symbol} ####\n'
 
-        for level in levels:
-            tos_scripts += get_line(symbol, level, levels[level])
+            for level in levels:
+                tos_scripts += get_line(symbol, level, levels[level])
 
-        f.write(tos_scripts)
+            f.write(tos_scripts)
 
     f.close()
 
@@ -136,8 +142,14 @@ def get_line_colors():
     return 'def vtR = 212; def vtG = 25; def vtB = 25; def r = 222; def g = 202; def b = 226;'
 
 
+def get_tos_symbol(symbol):
+    futures = [es, nq, rty]
+
+    return symbol if symbol not in futures else f'/{symbol}:XCME'
+
+
 def get_line(symbol, level, numeric_value):
-    tos_symbol = symbol if symbol == spx or symbol == ndx or symbol == spy else f'/{symbol}:XCME'
+    tos_symbol = get_tos_symbol(symbol)
     plot_variable = f'{symbol}_{level}'
     plot = f'plot {plot_variable} = if (GetSymbol() == "{tos_symbol}") then {numeric_value} else Double.NAN;\n'
     plot_set_style = f'{plot_variable}.SetStyle(Curve.SHORT_DASH);\n'

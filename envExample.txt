@@ -6,3 +6,4 @@ ES=
 NQ=
 RTY=
 SPY=
+QQQ=
