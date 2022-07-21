@@ -138,8 +138,8 @@ def create_tos_script():
 
 
 def get_line_colors():
-    # Use RGB for different colors (vt) is for the volatility trigger
-    return 'def vtR = 212; def vtG = 25; def vtB = 25; def r = 222; def g = 202; def b = 226;'
+    # Use RGB for different colors (vt) is for the volatility trigger (zg) is for zero gamma
+    return 'def vtR = 212; def vtG = 25; def vtB = 25; def r = 222; def g = 202; def b = 226; def zgR = 208; def zgG = 215; def zgB = 17;'
 
 
 def get_tos_symbol(symbol):
@@ -148,12 +148,21 @@ def get_tos_symbol(symbol):
     return symbol if symbol not in futures else f'/{symbol}:XCME'
 
 
+def get_line_color(level, plot_variable):
+    if level == 'VolTrig':
+        return f'{plot_variable}.SetDefaultColor(createcolor(vtR, vtG, vtB));\n\n'
+    elif level == 'ZeroGamma':
+        return f'{plot_variable}.SetDefaultColor(createcolor(zgR, zgG, zgB));\n\n'
+
+    return f'{plot_variable}.SetDefaultColor(createcolor(r, g, b));\n\n'
+
+
 def get_line(symbol, level, numeric_value):
     tos_symbol = get_tos_symbol(symbol)
     plot_variable = f'{symbol}_{level}'
     plot = f'plot {plot_variable} = if (GetSymbol() == "{tos_symbol}") then {numeric_value} else Double.NAN;\n'
     plot_set_style = f'{plot_variable}.SetStyle(Curve.SHORT_DASH);\n'
-    plot_set_color = f'{plot_variable}.SetDefaultColor(createcolor(vtR, vtG, vtB));\n\n' if level == 'VolTrig' else f'{plot_variable}.SetDefaultColor(createcolor(r, g, b));\n\n'
+    plot_set_color = get_line_color(level, plot_variable)
 
     return plot + plot_set_style + plot_set_color
 
